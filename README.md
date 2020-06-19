@@ -130,7 +130,7 @@ Tooltip on top
 ___
 **NOTE**
 
-> For only manual triggering just pass empty string `""` to this option and use open option to handle the tooltip manually
+> For only manual triggering just pass empty string `""` to trigger option and use open option to handle the tooltip manually
 
 ### Todo
 - [ ] Animation
