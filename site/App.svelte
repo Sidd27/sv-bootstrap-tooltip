@@ -10,5 +10,9 @@
   <button type="button" class="btn btn-secondary" bind:this={referenceEle}>
     Tooltip on top
   </button>
-  <Tooltip triggerElement={referenceEle}>Tooltip</Tooltip>
+  <Tooltip triggerElement={referenceEle}>
+    <em>Tooltip</em>
+    <u>with</u>
+    <b>HTML</b>
+  </Tooltip>
 </main>
