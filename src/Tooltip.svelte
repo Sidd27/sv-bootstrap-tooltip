@@ -1,180 +1,97 @@
 <script>
-  import { onMount, onDestroy, tick } from "svelte";
-  import { createPopper } from "@popperjs/core";
+  import { createPopper } from '@popperjs/core';
 
-  const noop = () => {};
+  let {
+    open = $bindable(false),
+    triggerElement = null,
+    flip = true,
+    placement = 'top',
+    trigger = 'hover|focus',
+    offset = [0, 4],
+    onOpened = () => {},
+    onClosed = () => {},
+    children,
+  } = $props();
 
-  export let open = false;
-  export let triggerElement;
-  export let flip = true;
-  export let placement = "top";
-  export let trigger = "hover|focus";
-  export let offset = [0, 4];
-  export let onOpened = noop;
-  export let onClosed = noop;
-
-  let _triggerEvent;
-  let _tooltipElement;
-  let _arrowElement;
-  let _placementClass;
-  let _popperInstance;
-  let _isHover;
-  let _isFocus;
-  let _isClick;
-
-  let _eventsArray = [];
-
-  const TRIGGER_HOVER = "hover";
-  const TRIGGER_FOCUS = "focus";
-  const TRIGGER_CLICK = "click";
-
-  $: {
-    if (open) {
-      onTooltipOpened();
-    } else {
-      onTooltipClosed();
-    }
-  }
-
-  function _setEvents(event) {
-    _eventsArray.push(event);
-  }
+  let tooltipEl = $state(null);
+  let arrowEl = $state(null);
 
   function attachEvent(target, ...args) {
     target.addEventListener(...args);
-    return {
-      remove: () => target.removeEventListener(...args)
-    };
+    return { remove: () => target.removeEventListener(...args) };
   }
 
-  function _setTriggersTypes() {
-    const tiggerArray = trigger.split("|");
-    _isHover = tiggerArray.includes(TRIGGER_HOVER);
-    _isFocus = tiggerArray.includes(TRIGGER_FOCUS);
-    _isClick = tiggerArray.includes(TRIGGER_CLICK);
-  }
+  $effect(() => {
+    if (!open || !tooltipEl) return;
 
-  async function _createPopperInstance() {
-    await tick();
-    _popperInstance = createPopper(triggerElement, _tooltipElement, {
+    const instance = createPopper(triggerElement, tooltipEl, {
       placement,
       modifiers: [
-        {
-          name: "arrow",
-          options: {
-            element: _arrowElement
-          }
-        },
-        {
-          name: "flip",
-          enabled: flip
-        },
-        {
-          name: "offset",
-          options: {
-            offset
-          }
-        },
-        {
-          name: "preventOverflow",
-          options: {
-            altBoundary: true
-          }
-        }
-      ]
+        { name: 'arrow', options: { element: arrowEl } },
+        { name: 'flip', enabled: flip },
+        { name: 'offset', options: { offset } },
+        { name: 'preventOverflow', options: { altBoundary: true } },
+      ],
     });
-  }
-
-  function onTooltipOpened() {
-    _createPopperInstance();
     onOpened();
-  }
 
-  function _hoverEvent() {
-    const mouseEnterInstance = attachEvent(
-      triggerElement,
-      "mouseenter",
-      event => {
-        open = true;
-      }
-    );
-    const mouseLeaveInstance = attachEvent(
-      triggerElement,
-      "mouseleave",
-      event => {
-        open = false;
-      }
-    );
-    _setEvents(mouseEnterInstance);
-    _setEvents(mouseLeaveInstance);
-  }
-
-  function _focusEvent() {
-    const focusInstance = attachEvent(triggerElement, "focus", event => {
-      open = true;
-    });
-    const blurInstance = attachEvent(triggerElement, "blur", event => {
-      open = false;
-    });
-    _setEvents(focusInstance);
-    _setEvents(blurInstance);
-  }
-
-  function _clickEvent() {
-    const clickEventInstance = attachEvent(triggerElement, "click", event => {
-      open = !open;
-    });
-    _setEvents(clickEventInstance);
-  }
-
-  function _setTriggers() {
-    if (_isHover) {
-      _hoverEvent();
-    }
-    if (_isClick) {
-      _clickEvent();
-    }
-    if (_isFocus) {
-      _focusEvent();
-    }
-  }
-
-  function _destroyPopperInstance() {
-    if (_popperInstance) {
-      _popperInstance.destroy();
-      _popperInstance = null;
-    }
-  }
-
-  function _removeTiggers() {
-    _eventsArray.forEach(event => event.remove());
-  }
-
-  function onTooltipClosed() {
-    _destroyPopperInstance();
-    onClosed();
-  }
-
-  onMount(async () => {
-    _setTriggersTypes();
-    await tick();
-    _setTriggers();
+    return () => {
+      instance.destroy();
+      onClosed();
+    };
   });
 
-  onDestroy(() => {
-    _removeTiggers();
-    _destroyPopperInstance();
+  $effect(() => {
+    if (!triggerElement) return;
+
+    const triggers = trigger.split('|');
+    const events = [];
+
+    if (triggers.includes('hover')) {
+      events.push(
+        attachEvent(triggerElement, 'mouseenter', () => {
+          open = true;
+        })
+      );
+      events.push(
+        attachEvent(triggerElement, 'mouseleave', () => {
+          open = false;
+        })
+      );
+    }
+    if (triggers.includes('focus')) {
+      events.push(
+        attachEvent(triggerElement, 'focus', () => {
+          open = true;
+        })
+      );
+      events.push(
+        attachEvent(triggerElement, 'blur', () => {
+          open = false;
+        })
+      );
+    }
+    if (triggers.includes('click')) {
+      events.push(
+        attachEvent(triggerElement, 'click', () => {
+          open = !open;
+        })
+      );
+    }
+
+    return () => events.forEach((e) => e.remove());
   });
 </script>
 
 {#if open}
   <div
-    class="tooltip fade bs-tooltip-{placement} show"
+    class="tooltip bs-tooltip-{placement} fade show"
     role="tooltip"
-    bind:this={_tooltipElement}>
-    <div class="arrow" bind:this={_arrowElement} />
+    bind:this={tooltipEl}
+  >
+    <div class="tooltip-arrow" bind:this={arrowEl}></div>
     <div class="tooltip-inner">
-      <slot />
+      {@render children?.()}
     </div>
   </div>
 {/if}

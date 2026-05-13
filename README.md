@@ -1,143 +1,100 @@
-# sv-bootstrap-tooltip (Svelte Bootstrap Tooltip)
-Svelte Tooltip Component for Bootstrap (Bootstrap’s tooltip plugin in svlete applications), can be used with sapper or standalone with svelte.Just like Vainilla bootstrap this plugin too is built on a third party library, [Popper.js](https://popper.js.org/), which provides dynamic positioning and viewport detection. But Unlike Vainilla bootstrap we are using PopperJs V2 instead of V1
+# sv-bootstrap-tooltip
 
-## How to install
-1. ```npm install --save-dev sv-bootstrap-tooltip @rollup/plugin-replace```
-2. Add below code in your rollup config
+Bootstrap 5 tooltip component for Svelte 5.
 
-```js
-import replace from '@rollup/plugin-replace';
-..
-..
-..
-plugins: [
-  ..., // Other Plugins
-  ..., // Other Plugins
-replace({
-	  'process.env.NODE_ENV': JSON.stringify('production'),
-	   include: '**/node_modules/**',
-    })
-]
+### Demo
+
+[Live demo](https://sidd27.github.io/sv-bootstrap-tooltip/)
+
+## Installation
+
+```bash
+npm install sv-bootstrap-tooltip
 ```
 
 ### Requirements
-Bootstrap CSS needs to be present globally in project
 
-## Simple Demo
-[Demo link](https://svelte.dev/repl/3840bbbffe4742fb8ada012b98e602f5?version=3.23.2)
+- Node >= 24
+- Svelte 5
+- Bootstrap 5 CSS included globally in your project
 
 ## Usage
 
-### Simple
+### Basic
 
-#### Example
-
-```html
+```svelte
 <script>
-  import Tooltip from "sv-bootstrap-tooltip";
-  let referenceEle;
+  import Tooltip from 'sv-bootstrap-tooltip';
+  let btnEl = $state(null);
 </script>
 
-<button type="button" class="btn btn-secondary" bind:this={referenceEle}>
-Tooltip on top
-</button>
-<Tooltip triggerElement={referenceEle}>Tooltip</Tooltip>
+<button bind:this={btnEl}>Hover me</button>
 
+{#if btnEl}
+  <Tooltip triggerElement={btnEl}>Tooltip text</Tooltip>
+{/if}
 ```
 
-### HTML inside Tooltip
+### HTML content
 
-You can pass the any html between opening and closing tag of `Tooltip` Element
+Any markup works inside the tooltip:
 
-#### Example
-
-```html
-<script>
-  import Tooltip from "sv-bootstrap-tooltip";
-  let referenceEle;
-</script>
-
-<button type="button" class="btn btn-secondary" bind:this={referenceEle}>
-Tooltip on top
-</button>
-<Tooltip triggerElement={referenceEle}>
-<em>Tooltip</em>
-<u>with</u>
-<b>HTML</b>
-</Tooltip>
+```svelte
+{#if btnEl}
+  <Tooltip triggerElement={btnEl}>
+    <em>Rich</em> <strong>content</strong>
+  </Tooltip>
+{/if}
 ```
 
 ### Placement
 
-This option is used to define the placement of tooltip on an `triggerElement`. By default the placement is `top`
-
-#### Example
-
-```html
-<script>
-  import Tooltip from "sv-bootstrap-tooltip";
-  let referenceEle;
-</script>
-
-<button type="button" class="btn btn-secondary" bind:this={referenceEle}>
-    Tooltip on top
-  </button>
-<Tooltip triggerElement={referenceEle} placement="left">Tooltip</Tooltip>
+```svelte
+<Tooltip triggerElement={btnEl} placement="bottom">Bottom</Tooltip>
+<Tooltip triggerElement={btnEl} placement="right">Right</Tooltip>
+<Tooltip triggerElement={btnEl} placement="left">Left</Tooltip>
 ```
 
-#### Complete Placement Options
+### Trigger
 
-Options are similar to Vanilla Bootstrap
+Control how the tooltip opens. Separate multiple triggers with `|`:
 
-|Placement|Description|
-|--- |--- |
-|auto|Placements will choose the side with most space and arrow will be in the center of trigger element|
-|top|Placements will be on top and arrow will be in the center of trigger element|
-|bottom|Placements will be bottom and arrow will be in the center of trigger element|
-|right|Placements will be right and arrow will be in the center of trigger element|
-|left|Placements will be left and arrow will be in the center of trigger element|
-
-### Flip
-
-This option should tell the `Tooltip` to filp side if there is no space on the prefered side
-
-#### Example
-
-```html
-<script>
-    import Tooltip from "sv-bootstrap-tooltip";
-    let referenceEle;
-</script>
-
-<button type="button" class="btn btn-secondary" bind:this={referenceEle}>
-Tooltip on top
-</button>
-<Tooltip flip="false" triggerElement={referenceEle}>
-</Tooltip>
+```svelte
+<Tooltip triggerElement={btnEl} trigger="click">Click to toggle</Tooltip>
+<Tooltip triggerElement={btnEl} trigger="hover|focus">Hover or focus</Tooltip>
 ```
 
+### Manual control
 
-### Component Options
+Pass an empty `trigger` and use `bind:open` to control programmatically:
 
+```svelte
+<script>
+  let open = $state(false);
+  let el = $state(null);
+</script>
 
-|Name|Type|Default|Description|
-|--- |--- |--- |--- |
-|open|boolean|false|This option is used to manage the Tooltip manually.|
-|flip|boolean|true|This option should tell the `Tooltip` to filp side if there is no space on the prefered side.|
-|trigger|string|`hover|focus`|How tooltip is triggered - `click|hover|focus`. You may pass multiple triggers; separate them with a `|`.
-|offset|[?number, ?number] or Function([Definition](https://popper.js.org/docs/v2/modifiers/offset/#options))|[0, 4]|The offset modifier lets you displace tooltip element from triggerElement element.|
-|placement|string|top|This option is used to define the placement of tooltip on an `triggerElement`.|
-|onOpened|function|Empty function(noop)|Can be used for callbacks after the tooltip is opened.|
-|onClosed|function|Empty function(noop)|Can be used for callbacks after the tooltip is closed.|
+<span bind:this={el}>Target</span>
+<button onclick={() => (open = !open)}>Toggle</button>
 
-___
-**NOTE**
+{#if el}
+  <Tooltip triggerElement={el} trigger="" bind:open>Manual tooltip</Tooltip>
+{/if}
+```
 
-> For only manual triggering just pass empty string `""` to trigger option and use open option to handle the tooltip manually
+## Props
 
-### Todo
-- [ ] Animation
-- [ ] Adding More Placement options
+| Name             | Type                  | Default          | Description                                                                  |
+| ---------------- | --------------------- | ---------------- | ---------------------------------------------------------------------------- |
+| `open`           | `boolean`             | `false`          | Controls tooltip visibility. Supports `bind:open`.                           |
+| `triggerElement` | `HTMLElement \| null` | `null`           | The DOM element the tooltip is anchored to.                                  |
+| `placement`      | `string`              | `'top'`          | Popper placement: `top`, `bottom`, `left`, `right`, `auto`, …                |
+| `trigger`        | `string`              | `'hover\|focus'` | Pipe-separated triggers: `hover`, `focus`, `click`. Empty string for manual. |
+| `flip`           | `boolean`             | `true`           | Allow Popper to flip placement when there is not enough space.               |
+| `offset`         | `[number, number]`    | `[0, 4]`         | `[skidding, distance]` offset from the trigger element.                      |
+| `onOpened`       | `function`            | `() => {}`       | Callback fired when the tooltip opens.                                       |
+| `onClosed`       | `function`            | `() => {}`       | Callback fired when the tooltip closes.                                      |
 
 ### License
+
 [MIT](https://github.com/Sidd27/sv-bootstrap-tooltip/blob/master/LICENSE)
