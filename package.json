@@ -61,8 +61,8 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@rollup/plugin-commonjs": "^29.0.2",
-    "@rollup/plugin-replace": "^6.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-replace": "^6.0.0",
     "@rollup/plugin-terser": "^1.0.0",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@testing-library/jest-dom": "^6.0.0",
@@ -76,6 +76,7 @@
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
+    "prettier-plugin-bootstrap": "^0.3.1",
     "prettier-plugin-svelte": "^4.0.1",
     "rollup": "^4.0.0",
     "rollup-plugin-svelte": "^7.2.0",
