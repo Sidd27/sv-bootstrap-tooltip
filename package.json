@@ -76,7 +76,7 @@
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.4",
     "prettier": "^3.8.3",
-    "prettier-plugin-bootstrap": "^0.3.1",
+    "prettier-plugin-bootstrap": "^0.4.0",
     "prettier-plugin-svelte": "^4.0.1",
     "rollup": "^4.0.0",
     "rollup-plugin-svelte": "^7.2.0",
